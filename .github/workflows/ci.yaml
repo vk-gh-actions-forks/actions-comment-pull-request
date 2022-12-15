@@ -2,11 +2,13 @@ on: pull_request
 
 jobs:
   test_comment_pr:
-    runs-on: ubuntu-latest
     name: (NRT) Comment PR
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: Comment PR
         uses: ./
@@ -14,6 +16,6 @@ jobs:
           message: |
             Current branch is `${{ github.head_ref }}`.
             _(execution **${{ github.run_id }}** / attempt **${{ github.run_attempt }}**)_
-          comment_includes: Current branch
+          comment_tag: nrt
           reactions: eyes, rocket
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          mode: recreate

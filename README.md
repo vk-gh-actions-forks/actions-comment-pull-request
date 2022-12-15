@@ -22,11 +22,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Comment PR
-        uses: thollander/actions-comment-pull-request@v1
+        uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
             Hello world ! :wave:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 
@@ -37,12 +36,11 @@ It takes only valid reactions and adds it to the comment you've just created. (S
 
 ```yml
 - name: PR comment with reactions
-  uses: thollander/actions-comment-pull-request@v1
+  uses: thollander/actions-comment-pull-request@v2
   with:
     message: |
       Hello world ! :wave:
     reactions: eyes, rocket
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Specifying which pull request to comment on
@@ -53,39 +51,34 @@ That is particularly useful for manual workflow for instance (`workflow_run`).
 ```yml
 ...
 - name: Comment PR
-  uses: thollander/actions-comment-pull-request@v1
+  uses: thollander/actions-comment-pull-request@v2
   with:
     message: |
       Hello world ! :wave:
     pr_number: 123 # This will comment on pull request #123
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 
-### Upsert a comment
+### Update a comment
 
-Editing an existing comment is also possible thanks to the `comment_includes` input.
+Editing an existing comment is also possible thanks to the `comment_tag` input.
 
-It will search through all the comments of the PR and get the first one that has the provided text in it.
-If the comment body is not found, it will create a new comment.
+Thanks to this parameter, it will be possible to identify your comment and then to upsert on it. 
+If the comment is not found at first, it will create a new comment.
 
 _That is particularly interesting while committing multiple times in a PR and that you just want to have the last execution report printed. It avoids flooding the PR._
 
 ```yml
 ...
-- name: Comment PR
-  uses: thollander/actions-comment-pull-request@v1
+- name: Comment PR with execution number
+  uses: thollander/actions-comment-pull-request@v2
   with:
-    message: 'Loading ...'
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-...
-- name: Edit PR comment
-  uses: thollander/actions-comment-pull-request@v1
-  with:
-    message: 'Content loaded ! (edited)'
-    comment_includes: 'Loading'
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    message: |
+      _(execution **${{ github.run_id }}** / attempt **${{ github.run_attempt }}**)_
+    comment_tag: execution
 ```
+
+Note: the input `mode` can be used to either `upsert` (by default) or `recreate` the comment (= delete and create)
 
 ## Inputs 
 
@@ -93,11 +86,12 @@ _That is particularly interesting while committing multiple times in a PR and th
 
 | Name | Description | Required | Default |
 | --- | --- | --- | --- |
-| `GITHUB_TOKEN` | Token that is used to create comments | ✅ | |
+| `GITHUB_TOKEN` | Token that is used to create comments. Defaults to ${{ github.token }} | ✅ | |
 | `message` | The comment body | ✅ | |
 | `reactions` | List of reactions for the comment (comma separated). See https://docs.github.com/en/rest/reactions#reaction-types  | | |
-| `pr_number` | The number of the pull request where to create the comment | | current pull request number (deduced from context) |
-| `comment_includes` | The text that should be used to find comment in case of replacement. | | |
+| `pr_number` | The number of the pull request where to create the comment | | current pull-request/issue number (deduced from context) |
+| `comment_tag` | A tag on your comment that will be used to identify a comment in case of replacement | | |
+| `mode` | Mode that will be used to update comment (upsert/recreate) | | upsert |
 
 ## Contributing
 
@@ -109,4 +103,3 @@ It is handled by `vercel/ncc` compiler.
 ```sh
 $ npm run build
 ```
-

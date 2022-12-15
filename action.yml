@@ -9,13 +9,17 @@ inputs:
     required: true
   GITHUB_TOKEN:
     description: 'Github token of the repository (automatically created by Github)'
-    required: true
+    default: ${{ github.token }}
+    required: false
   reactions:
     description: 'You can set some reactions on your comments through the `reactions` input.'
   pr_number:
     description: 'Manual pull request number'
-  comment_includes:
-    description: 'The text that should be used to find comment in case of replacement.'
+  comment_tag:
+    description: 'A tag on your comment that will be used to identify a comment in case of replacement.'
+  mode:
+    description: 'Mode that will be used to update comment (upsert/recreate)'
+    default: 'upsert'
 runs:
   using: 'node16'
   main: 'lib/index.js'
